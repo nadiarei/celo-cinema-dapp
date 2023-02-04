@@ -32,25 +32,3 @@ export const compareWithObjectArray = (array, obj) => {
         return false;
     });
 }
-
-export const connectCeloWallet = async () => {
-    if (window.celo) {
-        notification("⚠️ Please approve this DApp to use it.");
-        try {
-            await window.celo.enable();
-            setTimeout(notificationOff(), 5000);
-
-            const web3 = new Web3(window.celo);
-            kit = newKitFromWeb3(web3);
-
-            const accounts = await kit.web3.eth.getAccounts();
-            kit.defaultAccount = accounts[0];
-
-            contract = new kit.web3.eth.Contract(cinemaAbi, CinemaContractAddress);
-        } catch (error) {
-            notification(`⚠️ ${error}.`);
-        }
-    } else {
-        notification("⚠️ Please install the CeloExtensionWallet.");
-    }
-};

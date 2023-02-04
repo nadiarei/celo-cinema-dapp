@@ -14,6 +14,7 @@ toastr.options = { "positionClass": "toast-top-center" }
 
 var spinner = new Spinner().spin();
 
+// renders loading spinner
 const renderLoading = (value = true) => {
     if (value) {
         spinner.spin(document.getElementById('spinnerContainer'));
@@ -29,6 +30,7 @@ function notification(_text) { toastr.warning(_text); }
 
 function notificationOff() { toastr.clear(); }
 
+// reverse hisory to see last added tickets first
 const sortHistory = (arr) => {
 
     let new_ = [];
@@ -49,9 +51,11 @@ const sortHistory = (arr) => {
     return new_;
 }
 
+// fetch all films
 const updateAllFilms = async () =>
     allFilms = await contract.methods.getAllFilms().call();
 
+// card title depends on ticket status(used or not used) and session expiry
 const cardTitle = (element) => {
 
     let class_ = "card-title ";

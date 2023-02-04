@@ -19,7 +19,7 @@ The information about films, sessions and tickets is saved on the blockchain and
 
 # Site demo
 
-DEMO LINK [CELO CINAME](link)
+DEMO LINK [CELO CINEMA](https://celo-cinema-dapp.onrender.com)
 
 ##NOTE
 WALLET REQUIRED TO TEST THIS DAPP IS [CeloExtensionWallet](https://chrome.google.com/webstore/detail/celoextensionwallet/kkilomkmpmkbdnfelcpgckmpcaemjcdh)

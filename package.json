@@ -1,4 +1,6 @@
 {
+  "name" : "celo-cinema-dapp",
+  "license": "MIT",
   "main": "index.js",
   "dependencies": {
     "@celo/contractkit": "^1.0.2"
