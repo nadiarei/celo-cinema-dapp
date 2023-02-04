@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.ico">
+
+    <title>Profile</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"/>
+    <!-- Toastr library for notifications -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"/>
+
+    <link rel="stylesheet" href="./common.css"/>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spin.js/4.1.1/spin.min.css">
+
+    <!-- Custom styles for the template -->
+    <style>
+        .card-horizontal {
+            display: flex;
+            flex: 1 1 auto;
+        }
+
+        div.img-square-wrapper{
+            width: 10%;
+        }
+
+        div.img-square-wrapper img{
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
+        <h5 class="my-0 mr-md-auto font-weight-normal"><a class="card-link" href="/">Cinema</a></h5>
+        <a class="btn btn-outline-primary" href="/profile.html">My profile</a>
+      </div>
+
+    <div class="alert alert-dark col-8 mx-auto d-none" id="purchase_alert" role="alert">
+        <div>
+            <span class="line-height:34px;">You have selected <span id="purchase_alert_count"></span></span>
+            <button class="btn btn-dark float-right" id="purchase_sessions">Purchase</button>
+        </div>
+    </div>
+
+    <div class="pricing-header px-3 py-3 pb-md-4 mx-auto text-center">
+        <h3 class="display-6">Tickets history</h3>
+    </div>
+
+    <div class="container">
+        <div id="list"> </div>
+    </div>
+
+    <div id="spinnerContainer" class="spinner" style="width:100px;height:100px;background-color: #fff; color:black;"></div>
+
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.3.2/spin.js"></script>
+</body>
+
+</html>

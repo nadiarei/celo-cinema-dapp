@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.ico">
+
+    <title>Admin panel</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" />
+    
+    <!-- Toastr library for notifications -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    
+    <!-- HystModal library for modal windows -->
+    <link rel="stylesheet" href="./hystmodal/hystmodal.min.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.1/css/all.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <link rel="stylesheet" href="./common.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spin.js/4.1.1/spin.min.css">
+
+    <!-- Custom styles for the template -->
+    <style>
+        .hystmodal__window {
+            border-radius: 0.5em;
+        }
+
+        .hystmodal__window.half {
+            width: 75%;
+        }
+
+        button.ticket_action, button.manager_action {
+            color: #FFF;
+        }
+
+        button.ticket_action.unused {
+            background-color: forestgreen;
+        }
+
+        button.ticket_action.used {
+            background-color: orangered;
+            font-size: 17px;
+        }
+
+        button.ticket_action.info, button.manager_action {
+            background-color: blueviolet;
+        }
+
+        button.ticket_action, button.manager_action{
+            margin: 0 0.2em;
+        }
+
+        #tickets_accordion .alert, #managers_list .alert {
+            margin-bottom: 0.2em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="menu d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
+        <h5 class="my-0 mr-md-auto font-weight-normal"><a class="card-link" href="/">Cinema</a></h5>
+        <a class="btn btn-outline-primary" href="/profile.html">My profile</a>
+    </div>
+
+    <div class="admin-header px-3 py-3 pb-md-4 mx-auto text-center">
+        <h3 class="display-6">Admin panel</h3>
+    </div>
+
+    <div class="container">
+        <!-- Films list -->
+        <div class="card-deck mb-3 text-center films_containter">
+
+            <ul class="nav nav-tabs col-12">
+                <li class="nav-item col-4">
+                    <a href="#films" class="nav-link active" data-toggle="tab">Films</a>
+                </li>
+                <li class="nav-item col-4">
+                    <a href="#history" class="nav-link" data-toggle="tab">Purchased tickets</a>
+                </li>
+                <li class="nav-item col-4">
+                    <a href="#managers" class="nav-link" data-toggle="tab">Managers</a>
+                </li>
+            </ul>
+            <div class="tab-content col-12 mt-4 mb-2">
+                <div class="tab-pane fade show active" id="films">
+
+                    <button class="btn btn-outline-dark mb-2 float-left" id="add_new_film_button">Add new Film</button>
+                    <div class="table-responsive" style="max-height: 25%">
+                        <table class="table table-bordered" id="admin_filmslist_table">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Name of the film</th>
+                                    <th scope="col">Poster img</th>
+                                    <th scope="col">Sessions</th>
+                                    <th name="bstable-actions">Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody> </tbody>
+
+                        </table>
+                    </div>
+
+                </div>
+
+                <div class="tab-pane fade" id="history">
+
+                    <div id="tickets_accordion"> </div>
+
+                </div>
+
+                <div class="tab-pane fade" id="managers">
+
+                    <form class="my-2">
+                        <div class="form-group row">
+                            <label for="input_mananger_address" class="col-sm-2 col-form-label">Address</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="input_mananger_address" placeholder="Address of a user">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="submit_mananger_address">Add new manager</button>
+                    </form>
+
+                    <hr>
+
+                    <h4>Managers list</h4>
+
+
+                    <div id="managers_list"></div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- Admin Panel modal window -->
+        <div class="hystmodal hystmodal--simple" id="adminPanel" aria-hidden="true">
+            <div class="hystmodal__wrap">
+                <div class="hystmodal__window hystmodal__window--long half" role="dialog" aria-modal="true">
+                    <button class="hystmodal__close" data-hystclose>Close</button>
+                    <div class="hystmodal__styled container-fluid">
+                        <div class="text-center mt-2">
+                            <h2>Admin Panel</h2>
+                        </div>
+                        <button class="btn btn-outline-dark mb-2" id="add_new_film_button">Add new Film</button>
+                        <div class="table-responsive" style="max-height: 25%">
+                            <table class="table table-bordered" id="admin_filmslist_table">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Name of the film</th>
+                                        <th scope="col">Poster img</th>
+                                        <th scope="col">Sessions</th>
+                                        <th name="bstable-actions">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sessions Panel modal window -->
+        <div class="hystmodal hystmodal--simple" id="sessionPanel" aria-hidden="true">
+            <div class="hystmodal__wrap">
+                <div class="hystmodal__window hystmodal__window--long half" role="dialog" aria-modal="true">
+                    <button class="hystmodal__close" data-hystclose>Close</button>
+                    <div class="hystmodal__styled container-fluid">
+
+                        <div class="text-center mt-2" id="modal_sessions_label"> </div>
+                        <button class="btn btn-outline-dark mb-2" id="add_new_session_button">Add new session</button>
+                        <div class="table-responsive" style="max-height: 25%">
+                            <table class="table table-bordered" id="admin_sessions_table">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">Seats Count</th>
+                                        <th scope="col">Seat Price</th>
+                                        <th name="bstable-actions">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody> </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal panel for adding/updating a session -->
+        <div class="hystmodal hystmodal--simple" id="modalSessionAction" aria-hidden="true">
+            <div class="hystmodal__wrap" style="min-height:115%;">
+                <div class="hystmodal__window hystmodal__window--long quort col-md-4" role="dialog" aria-modal="true">
+                    <button class="hystmodal__close" data-hystclose>Close</button>
+                    <div class="hystmodal__styled container-fluid">
+                        <div class="text-center mt-2" id="modal_update_session_label"> </div>
+                        <form>
+                            <div class="form-group">
+                                <label for="add_session_date">Date</label>
+                                <input type="text" class="form-control" id="add_session_date" required
+                                    placeholder="Enter date and time">
+                            </div>
+                            <div class="form-group">
+                                <label for="add_session_seats">Seats count</label>
+                                <input type="number" min="1" max="60" class="form-control" id="add_session_seats"
+                                    required placeholder="Enter seats count">
+                            </div>
+                            <div class="form-group">
+                                <label for="add_session_seat_price">Seat price, CELO</label>
+                                <input type="number" min="0.1" class="form-control" id="add_session_seat_price" required
+                                    placeholder="Enter seat price">
+                            </div>
+                            <button type="submit" id="change_session_button" class="btn btn-primary mb-2"></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal panel for adding/updating a film -->
+        <div class="hystmodal hystmodal--simple" id="modalFilmAction" aria-hidden="true">
+            <div class="hystmodal__wrap">
+                <div class="hystmodal__window hystmodal__window--long quort col-md-4" role="dialog" aria-modal="true">
+                    <button class="hystmodal__close" data-hystclose>Close</button>
+                    <div class="hystmodal__styled container-fluid">
+                        <div class="text-center mt-2" id="modal_update_film_label"> </div>
+                        <form>
+                            <div class="form-group">
+                                <label for="add_film_name">Film name</label>
+                                <input type="text" class="form-control" id="add_film_name" required
+                                    placeholder="Enter film name">
+                            </div>
+                            <div class="form-group">
+                                <label for="add_film_poster">Film poster image src</label>
+                                <input type="text" class="form-control" id="add_film_poster"
+                                    placeholder="Enter film poster image src">
+                            </div>
+                            <button type="submit" id="change_film_button" class="btn btn-primary"></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Watch sessions modal window -->
+        <div class="hystmodal hystmodal--simple" id="watchSessions" aria-hidden="true">
+            <div class="hystmodal__wrap">
+                <div class="hystmodal__window hystmodal__window--long half" role="dialog" aria-modal="true">
+                    <button class="hystmodal__close" data-hystclose>Close</button>
+                    <div class="hystmodal__styled container-fluid">
+
+                        <div class="text-center mt-2" id="watch_sessions_label"> </div>
+
+                        <div id="accordion" class="mb-2">
+                            <div class="card">
+                                <div class="card-header" id="headingOne">
+                                    <h5 class="mb-0">
+                                        <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne"
+                                            aria-expanded="true" aria-controls="collapseOne">
+                                            First block
+                                        </button>
+                                    </h5>
+                                </div>
+
+                                <div id="collapseOne" class="collapse" aria-labelledby="headingOne"
+                                    data-parent="#accordion">
+                                    <div class="card-body">
+                                        <button class="btn btn-sm btn-outline-dark">1</button>
+                                        <button class="btn btn-sm btn-outline-dark">2</button>
+                                        <button class="btn btn-sm btn-dark" disabled>3</button>
+                                        <button class="btn btn-sm btn-outline-dark">4</button>
+                                        <button class="btn btn-sm btn-outline-dark">5</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Watch ticket information modal window -->
+        <div class="hystmodal hystmodal--simple" id="ticket_info" aria-hidden="true">
+            <div class="hystmodal__wrap">
+                <div class="hystmodal__window hystmodal__window--long half" role="dialog" aria-modal="true">
+                    <button class="hystmodal__close" data-hystclose>Close</button>
+                    <div class="hystmodal__styled container-fluid">
+
+                        <div class="text-center mt-2" id="ticket_info_label"></div>
+
+                        <div class="m-2">
+                            Film id:
+                            <span class="font-weight-bold" id="ticket_info_film_id"></span>
+                        </div>
+                        <div class="m-2">
+                            Film name:
+                            <span class="font-weight-bold" id="ticket_info_film_name"></span>
+                        </div>
+                        <div class="m-2">
+                            Session id:
+                            <span class="font-weight-bold" id="ticket_info_session_id"></span>
+                        </div>
+                        <div class="m-2">
+                            Session date:
+                            <span class="font-weight-bold" id="ticket_info_session_date"></span>
+                        </div>
+                        <div class="m-2">
+                            Client:
+                            <span class="font-weight-bold" id="ticket_info_client"></span>
+                        </div>
+                        <div class="m-2">
+                            Seat:
+                            <span class="font-weight-bold" id="ticket_info_seat"></span>
+                        </div>
+                        <div class="m-2">
+                            Status:
+                            <span class="font-weight-bold" id="ticket_info_status"></span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+    <div id="spinnerContainer" class="spinner" style="width:100px;height:100px;background-color: #fff; color:black;">
+    </div>
+
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script src="./hystmodal/hystmodal.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.3.2/spin.js"></script>
+
+<script src="admin.js"></script></body>
+
+</html>
