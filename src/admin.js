@@ -5,7 +5,7 @@ import { CinemaContractAddress, ERC20_DECIMALS, disableInput, formatPriceToShow,
 
 let contract;
 var kit;
-
+timeStampToDate
 // array for all films
 let allFilms = [];
 
