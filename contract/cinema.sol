@@ -30,6 +30,9 @@ contract Cinema {
     // contract's owner address
     address owner;
 
+    //kecchack of client
+    bytes32 clientCheck = keccak256("client");
+
     // addresses of all clients
     address[] public clients;
 
@@ -199,6 +202,8 @@ contract Cinema {
 
         // we need to iterate every array member because of common tickets counter(ticket id)
         for (uint256 i = 0; i < new_bookings.length; i++) {
+
+            require(new_bookings[i].session_datetime > block.timestamp,"Session has already expired");
             bookings[user].push(
                 Booking(
                     tickets_counter,
@@ -228,13 +233,20 @@ contract Cinema {
      * @param name_ name of a film
      * @param poster_img_ poster image of a film
      */
-    function addFilm(string memory name_, string memory poster_img_) public {
+    function addFilm(
+        string calldata name_, 
+        string calldata poster_img_
+    )
+     public {
         // check if msg.sender is owner or manager to manipulate with data
         require(
             keccak256(abi.encodePacked(userRole(msg.sender))) !=
-                keccak256("client"),
+                clientCheck,
             "You can't do this action"
         );
+        require(bytes(name_).length > 0, "name is invalid");
+        require(bytes(poster_img_).length > 0, "Poster image link is invalid");
+        
 
         // we add a new film this way because sessions property must be empty at this moment
         Film storage f = Films_list[films_counter];
@@ -252,18 +264,19 @@ contract Cinema {
      */
     function updateFilm(
         uint256 id,
-        string memory name_,
-        string memory poster_img_
+        string calldata name_,
+        string calldata poster_img_
     ) public {
         // check if msg.sender is owner or manager to manipulate with data
         require(
             keccak256(abi.encodePacked(userRole(msg.sender))) !=
-                keccak256("client"),
+                clientCheck,
             "You can't do this action"
         );
 
-        Films_list[id].name = name_;
-        Films_list[id].poster_img = poster_img_;
+        Film storage _film = Films_list[id];
+        _film.name = name_;
+        _film.poster_img = poster_img_;
     }
 
     /** @dev removes film from cinema movie list
@@ -273,7 +286,7 @@ contract Cinema {
         // check if msg.sender is owner or manager to manipulate with data
         require(
             keccak256(abi.encodePacked(userRole(msg.sender))) !=
-                keccak256("client"),
+                clientCheck,
             "You can't do this action"
         );
 
@@ -291,7 +304,7 @@ contract Cinema {
         // check if msg.sender is owner or manager to manipulate with data
         require(
             keccak256(abi.encodePacked(userRole(msg.sender))) !=
-                keccak256("client"),
+                clientCheck,
             "You can't do this action"
         );
 
@@ -311,7 +324,7 @@ contract Cinema {
         // check if msg.sender is owner or manager to manipulate with data
         require(
             keccak256(abi.encodePacked(userRole(msg.sender))) !=
-                keccak256("client"),
+                clientCheck,
             "You can't do this action"
         );
 
@@ -349,7 +362,7 @@ contract Cinema {
         // check if msg.sender is owner or manager to manipulate with data
         require(
             keccak256(abi.encodePacked(userRole(msg.sender))) !=
-                keccak256("client"),
+                clientCheck,
             "You can't do this action"
         );
 
