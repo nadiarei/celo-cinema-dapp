@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.9;
 
 /** @title System for booking cinema tickets */
 contract Cinema {
@@ -49,6 +49,30 @@ contract Cinema {
         owner = msg.sender;
     }
 
+        event NewFilmAdded(
+        string name,
+        string poster_img
+    );
+
+    event NewManagerAdded(
+        address manager
+    );
+
+    event ManagerRemoved(
+        address user
+    );
+
+    event BookingPurchaseSuccessful(
+        address user
+        );
+
+    event TicketStatusChanged(
+        address client,
+        uint256 ticket_id,
+        bool status
+    );
+
+
     /** @dev returns user's role, it can be owner / manager / owner
      * @param user address of a user
      * @return string role of a user by his address
@@ -80,25 +104,44 @@ contract Cinema {
     function addManager(address user) public {
         require(msg.sender == owner, "Only owner can do this action");
 
+           // Revert if the user is the null address
+        require(user != address(0), "Address 0 is not a valid address for a manager");
+
         // revert if user is already a manager
         require(isNewManager(user) == true, "User is already a manager");
 
         managers.push(user);
         managers_indices[user] = managers.length - 1;
+
+
     }
 
-    /** @dev removes address from managers list
-     * @param user address of a user
-     */
-    function removeManager(address user) public {
-        require(msg.sender == owner, "Only owner can do this action");
+   function removeManager(address user) public {
+    require(msg.sender == owner, "Only owner can do this action");
 
-        // revert if user is not a manager
-        require(isNewManager(user) == false, "User is not a manager");
+       // Revert if the user is the null address
+    require(user != address(0), "Address 0 is not a valid address for a manager");
 
-        delete managers[managers_indices[user]];
-        delete managers_indices[user];
-    }
+    // revert if user is not a manager
+    require(isNewManager(user) == false, "User is not a manager");
+
+    uint managerIndex = managers_indices[user];
+    uint lastManagerIndex = managers.length - 1;
+
+    // Overwrite the removed manager with the last manager
+    managers[managerIndex] = managers[lastManagerIndex];
+
+    // Update the index of the last manager
+    managers_indices[managers[managerIndex]] = managerIndex;
+
+    // Delete the reference to the last manager
+    delete managers[lastManagerIndex];
+    delete managers_indices[user];
+
+    emit ManagerRemoved (user );
+}
+
+    
 
     /**
      * @return address[] addresses of all managers
@@ -112,6 +155,9 @@ contract Cinema {
      * @return bool
      */
     function isNewClient(address user) internal view returns (bool) {
+
+            require(isNewManager(msg.sender), "Only managers can access this function");
+
         for (uint256 i = 0; i < clients.length; i++) {
             if (clients[i] == user) {
                 return false;
@@ -125,6 +171,7 @@ contract Cinema {
      * @return address[] array of clients addresses
      */
     function allClients() public view returns (address[] memory) {
+      require(isNewManager(msg.sender), "Only managers can access this function");
         return clients;
     }
 
@@ -133,13 +180,17 @@ contract Cinema {
      * @param ticket_index index of a ticket inside bookings array(tickets index of user starts from 0, but their ticket_id is common for all tickets)
      * @param status status of a ticket
      */
-    function setTicketStatus(
-        address client,
-        uint256 ticket_index,
-        bool status
-    ) public {
-        bookings[client][ticket_index].isUsed = status;
-    }
+  function setTicketStatus(
+    address client,
+    uint256 ticket_index,
+    bool status
+) public {
+    // Check if the caller is the ticket owner or a manager
+    require(msg.sender == client || isNewManager(msg.sender), "Unauthorized access");
+
+    bookings[client][ticket_index].isUsed = status;
+}
+
 
     /** @dev returns ticket of user by index
      * @param client address of a user
@@ -150,6 +201,8 @@ contract Cinema {
         address client,
         uint256 ticket_index
     ) public view returns (Booking memory) {
+        require(isNewManager(msg.sender) || msg.sender == client, "Only the ticket owner or a manager can access this function");
+
         return bookings[client][ticket_index];
     }
 
@@ -195,6 +248,11 @@ contract Cinema {
         // if user is a new client, save his address
         if (isNewClient(user)) {
             clients.push(user);
+
+      emit BookingPurchaseSuccessful (user );
+
+
+
         }
 
         // we need to iterate every array member because of common tickets counter(ticket id)
@@ -221,6 +279,8 @@ contract Cinema {
      * @return Booking[] array of client's tickets
      */
     function allBookings(address user) public view returns (Booking[] memory) {
+    require(isNewManager(msg.sender), "Only managers can access this function");
+
         return bookings[user];
     }
 
@@ -243,6 +303,9 @@ contract Cinema {
         f.poster_img = poster_img_;
 
         films_counter++;
+
+       emit NewFilmAdded( name_ , poster_img_);
+
     }
 
     /** @dev updates an existing film
