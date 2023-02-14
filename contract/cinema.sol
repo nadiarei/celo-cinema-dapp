@@ -112,8 +112,8 @@ contract Cinema {
             "Address 0 is not a valid address for a manager"
         );
 
-        uint managerIndex = managers_indices[user];
-        uint lastManagerIndex = managers.length - 1;
+        uint256 managerIndex = managers_indices[user];
+        uint256 lastManagerIndex = managers.length - 1;
 
         // replace removed manager with the last manager
         managers[managerIndex] = managers[lastManagerIndex];
@@ -172,10 +172,11 @@ contract Cinema {
      * @param ticket_index index of a ticket inside an array
      * @return Booking object
      */
-    function getTicket(
-        address client,
-        uint256 ticket_index
-    ) public view returns (Booking memory) {
+    function getTicket(address client, uint256 ticket_index)
+        public
+        view
+        returns (Booking memory)
+    {
         return bookings[client][ticket_index];
     }
 
@@ -185,15 +186,15 @@ contract Cinema {
     function allCurrentTickets() public view returns (Booking[] memory) {
         Booking[] memory current_tickets = new Booking[](tickets_counter);
 
-        uint counter_ = 0;
+        uint256 counter_ = 0;
 
         // current timestamp
-        uint timestamp = block.number;
+        uint256 timestamp = block.number;
 
-        for (uint i = 0; i < clients.length; i++) {
+        for (uint256 i = 0; i < clients.length; i++) {
             Booking[] memory b = bookings[clients[i]];
 
-            for (uint j = 0; j < b.length; j++) {
+            for (uint256 j = 0; j < b.length; j++) {
                 // only retrieve tickets with not expired movie session
                 if (b[j].session_datetime >= timestamp) {
                     current_tickets[counter_] = (b[j]);
@@ -209,10 +210,10 @@ contract Cinema {
      * @param user address of a user
      * @param new_bookings array of new tickets user purchases
      */
-    function purchaseBooking(
-        address user,
-        Booking[] memory new_bookings
-    ) public payable {
+    function purchaseBooking(address user, Booking[] memory new_bookings)
+        public
+        payable
+    {
         // transfer tickets total price to owner
         (bool success, ) = payable(owner).call{value: msg.value}("");
 
@@ -228,7 +229,7 @@ contract Cinema {
         require(total_ == msg.value, "Total price is incorrect");
 
         // current timestamp
-        uint timestamp = block.number;
+        uint timestamp = block.number * 100000;
 
         Booking[] memory tickets = allCurrentTickets();
 
@@ -239,10 +240,7 @@ contract Cinema {
                     (new_bookings[j].film_id == tickets[i].film_id &&
                         new_bookings[j].session_id == tickets[i].session_id &&
                         new_bookings[j].seat == tickets[i].seat) ||
-                    Films_list[new_bookings[i].film_id]
-                        .sessions[new_bookings[i].session_id]
-                        .datetime <
-                    timestamp
+                    new_bookings[j].session_datetime < timestamp < timestamp
                 ) {
                     revert("Ticket is not available");
                 }
@@ -285,10 +283,10 @@ contract Cinema {
      * @param name_ name of a film
      * @param poster_img_ poster image of a film
      */
-    function addFilm(
-        string memory name_,
-        string memory poster_img_
-    ) public ownerOrManagerRole {
+    function addFilm(string memory name_, string memory poster_img_)
+        public
+        ownerOrManagerRole
+    {
         // we add a new film this way because sessions property must be empty at this moment
         Film storage f = Films_list[films_counter];
 
@@ -329,10 +327,10 @@ contract Cinema {
      * @param film_id index of a film
      * @param new_session object of Session struct
      */
-    function addFilmSession(
-        uint256 film_id,
-        Session memory new_session
-    ) public ownerOrManagerRole {
+    function addFilmSession(uint256 film_id, Session memory new_session)
+        public
+        ownerOrManagerRole
+    {
         require(
             bytes(Films_list[film_id].name).length != 0 &&
                 bytes(Films_list[film_id].poster_img).length != 0,
@@ -372,9 +370,11 @@ contract Cinema {
      * @param id index of a film
      * @return Session[] array of sessions
      */
-    function getFilmSessions(
-        uint256 id
-    ) public view returns (Session[] memory) {
+    function getFilmSessions(uint256 id)
+        public
+        view
+        returns (Session[] memory)
+    {
         return Films_list[id].sessions;
     }
 
@@ -382,10 +382,10 @@ contract Cinema {
      * @param id index of a session
      * @param film_id index of a film
      */
-    function removeSession(
-        uint256 id,
-        uint256 film_id
-    ) public ownerOrManagerRole {
+    function removeSession(uint256 id, uint256 film_id)
+        public
+        ownerOrManagerRole
+    {
         delete Films_list[film_id].sessions[id];
     }
 }

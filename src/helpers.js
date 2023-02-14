@@ -1,6 +1,6 @@
 export const ERC20_DECIMALS = 18;
 
-export const CinemaContractAddress = "0x6dd01a262EDF1c4cf7a00cF5f66542C6C539dEe3";
+export const CinemaContractAddress = "0x6D36f91d6354B2341d0B44141FA3c78F07016782";
 
 export const leadingZero = (num) => ( ("0" + num).slice(-2) );
 
