@@ -241,7 +241,11 @@ $('button#proceed_purchase').click(async () => {
 
     const timestamp_ = Date.now();
 
+    // length of orders before checking
     const orders_l = current_orders.length;
+    
+    // update tickets of all users again to get fresh data
+    retrieve_current_tickets();
 
     // recreate an object of purchases
     current_orders.forEach((element) => {
