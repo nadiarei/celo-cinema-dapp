@@ -240,7 +240,7 @@ contract Cinema {
                     (new_bookings[j].film_id == tickets[i].film_id &&
                         new_bookings[j].session_id == tickets[i].session_id &&
                         new_bookings[j].seat == tickets[i].seat) ||
-                    new_bookings[j].session_datetime < timestamp < timestamp
+                    new_bookings[j].session_datetime < timestamp
                 ) {
                     revert("Ticket is not available");
                 }
