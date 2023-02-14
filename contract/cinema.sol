@@ -49,6 +49,20 @@ contract Cinema {
         owner = msg.sender;
     }
 
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can do this action");
+        _;
+    }
+
+    modifier ownerOrManagerRole() {
+        require(
+            keccak256(abi.encodePacked(userRole(msg.sender))) !=
+                keccak256("client"),
+            "You can't do this action"
+        );
+        _;
+    }
+
     /** @dev returns user's role, it can be owner / manager / owner
      * @param user address of a user
      * @return string role of a user by his address
@@ -77,9 +91,7 @@ contract Cinema {
     /** @dev adds address to managers list
      * @param user address of a user
      */
-    function addManager(address user) public {
-        require(msg.sender == owner, "Only owner can do this action");
-
+    function addManager(address user) public onlyOwner {
         // revert if user is already a manager
         require(isNewManager(user) == true, "User is already a manager");
 
@@ -90,13 +102,27 @@ contract Cinema {
     /** @dev removes address from managers list
      * @param user address of a user
      */
-    function removeManager(address user) public {
-        require(msg.sender == owner, "Only owner can do this action");
-
+    function removeManager(address user) public onlyOwner {
         // revert if user is not a manager
         require(isNewManager(user) == false, "User is not a manager");
 
-        delete managers[managers_indices[user]];
+        // revert if the user is the null address
+        require(
+            user != address(0),
+            "Address 0 is not a valid address for a manager"
+        );
+
+        uint managerIndex = managers_indices[user];
+        uint lastManagerIndex = managers.length - 1;
+
+        // replace removed manager with the last manager
+        managers[managerIndex] = managers[lastManagerIndex];
+
+        // update the index of the last manager
+        managers_indices[managers[managerIndex]] = managerIndex;
+
+        // delete the last element from array
+        managers.pop();
         delete managers_indices[user];
     }
 
@@ -137,7 +163,7 @@ contract Cinema {
         address client,
         uint256 ticket_index,
         bool status
-    ) public {
+    ) public ownerOrManagerRole {
         bookings[client][ticket_index].isUsed = status;
     }
 
@@ -192,6 +218,37 @@ contract Cinema {
 
         require(success, "Purchase is failed");
 
+        // compare tickets total price with msg value
+        uint256 total_ = 0;
+
+        for (uint256 i = 0; i < new_bookings.length; i++) {
+            total_ += new_bookings[i].seat_price;
+        }
+
+        require(total_ == msg.value, "Total price is incorrect");
+
+        // current timestamp
+        uint timestamp = block.number;
+
+        Booking[] memory tickets = allCurrentTickets();
+
+        // check if ticket is avaiable and session is not expired
+        for (uint256 i = 0; i < tickets.length; i++) {
+            for (uint256 j = 0; j < new_bookings.length; j++) {
+                if (
+                    (new_bookings[j].film_id == tickets[i].film_id &&
+                        new_bookings[j].session_id == tickets[i].session_id &&
+                        new_bookings[j].seat == tickets[i].seat) ||
+                    Films_list[new_bookings[i].film_id]
+                        .sessions[new_bookings[i].session_id]
+                        .datetime <
+                    timestamp
+                ) {
+                    revert("Ticket is not available");
+                }
+            }
+        }
+
         // if user is a new client, save his address
         if (isNewClient(user)) {
             clients.push(user);
@@ -228,14 +285,10 @@ contract Cinema {
      * @param name_ name of a film
      * @param poster_img_ poster image of a film
      */
-    function addFilm(string memory name_, string memory poster_img_) public {
-        // check if msg.sender is owner or manager to manipulate with data
-        require(
-            keccak256(abi.encodePacked(userRole(msg.sender))) !=
-                keccak256("client"),
-            "You can't do this action"
-        );
-
+    function addFilm(
+        string memory name_,
+        string memory poster_img_
+    ) public ownerOrManagerRole {
         // we add a new film this way because sessions property must be empty at this moment
         Film storage f = Films_list[films_counter];
 
@@ -254,12 +307,11 @@ contract Cinema {
         uint256 id,
         string memory name_,
         string memory poster_img_
-    ) public {
-        // check if msg.sender is owner or manager to manipulate with data
+    ) public ownerOrManagerRole {
         require(
-            keccak256(abi.encodePacked(userRole(msg.sender))) !=
-                keccak256("client"),
-            "You can't do this action"
+            bytes(Films_list[id].name).length != 0 &&
+                bytes(Films_list[id].poster_img).length != 0,
+            "Seems like film doesn't exist"
         );
 
         Films_list[id].name = name_;
@@ -269,14 +321,7 @@ contract Cinema {
     /** @dev removes film from cinema movie list
      * @param id id of a film
      */
-    function removeFilm(uint256 id) public {
-        // check if msg.sender is owner or manager to manipulate with data
-        require(
-            keccak256(abi.encodePacked(userRole(msg.sender))) !=
-                keccak256("client"),
-            "You can't do this action"
-        );
-
+    function removeFilm(uint256 id) public ownerOrManagerRole {
         delete Films_list[id];
     }
 
@@ -287,12 +332,11 @@ contract Cinema {
     function addFilmSession(
         uint256 film_id,
         Session memory new_session
-    ) public {
-        // check if msg.sender is owner or manager to manipulate with data
+    ) public ownerOrManagerRole {
         require(
-            keccak256(abi.encodePacked(userRole(msg.sender))) !=
-                keccak256("client"),
-            "You can't do this action"
+            bytes(Films_list[film_id].name).length != 0 &&
+                bytes(Films_list[film_id].poster_img).length != 0,
+            "Seems like film doesn't exist"
         );
 
         Films_list[film_id].sessions.push(new_session);
@@ -307,14 +351,7 @@ contract Cinema {
         uint256 id,
         uint256 film_id,
         Session memory new_session
-    ) public {
-        // check if msg.sender is owner or manager to manipulate with data
-        require(
-            keccak256(abi.encodePacked(userRole(msg.sender))) !=
-                keccak256("client"),
-            "You can't do this action"
-        );
-
+    ) public ownerOrManagerRole {
         Films_list[film_id].sessions[id] = new_session;
     }
 
@@ -345,14 +382,10 @@ contract Cinema {
      * @param id index of a session
      * @param film_id index of a film
      */
-    function removeSession(uint256 id, uint256 film_id) public {
-        // check if msg.sender is owner or manager to manipulate with data
-        require(
-            keccak256(abi.encodePacked(userRole(msg.sender))) !=
-                keccak256("client"),
-            "You can't do this action"
-        );
-
+    function removeSession(
+        uint256 id,
+        uint256 film_id
+    ) public ownerOrManagerRole {
         delete Films_list[film_id].sessions[id];
     }
 }

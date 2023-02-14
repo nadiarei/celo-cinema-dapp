@@ -62,6 +62,8 @@ const updateAllFilms = async () =>
 const retrieve_current_tickets = async () => {
     const tickets = await contract.methods.allCurrentTickets().call();
 
+    current_tickets = [];
+
     tickets.forEach((element) => {
         current_tickets.push({
             film_id: element.film_id,
@@ -239,18 +241,48 @@ $('button#proceed_purchase').click(async () => {
 
     const timestamp_ = Date.now();
 
+    const orders_l = current_orders.length;
+
     // recreate an object of purchases
     current_orders.forEach((element) => {
-        purchases.push({
-            ticket_id: 0,
-            film_id: parseInt(element.film_id),
-            session_id: parseInt(element.session_id),
-            seat: parseInt(element.seat),
-            seat_price: element.seat_price,
-            session_datetime: element.datetime,
-            purchase_datetime: timestamp_
+
+        // before purchase check if a seat is available and a session is not expired
+        const available = !compareWithObjectArray(current_tickets, {
+            film_id: element.film_id,
+            session_id: element.session_id,
+            seat: element.seat
         });
+
+        const not_expired = parseInt(allFilms[element.film_id].sessions[element.session_id].datetime) > timestamp_;
+
+        if(available && not_expired){
+            purchases.push({
+                ticket_id: 0,
+                film_id: parseInt(element.film_id),
+                session_id: parseInt(element.session_id),
+                seat: parseInt(element.seat),
+                seat_price: element.seat_price,
+                session_datetime: element.datetime,
+                purchase_datetime: timestamp_
+            });
+        // cannot purchase a ticket, remove it from cart
+        }else{
+            removeBookOrder(element.film_id, element.session_id, element.seat, element.user);
+        }
+
     });
+
+    if(orders_l > purchases.length) {
+        notification("Some of tickets are not available or expired");
+
+        renderFilmsContainer();
+
+        modal.close();
+
+        renderLoading(false);
+
+        return;
+    }
 
     notification("Wait till transaction is completed..");
 
